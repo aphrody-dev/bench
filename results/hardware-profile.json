@@ -1,0 +1,145 @@
+{
+  "generated_at": "2026-11-10T21:20:00Z",
+  "hardware": {
+    "cpu": "Intel Core i7-13700F",
+    "cpu_cores": 16,
+    "cpu_threads": 24,
+    "cpu_simd": "AVX2, FMA3, BMI2",
+    "ram": "32 GB DDR5-5800 MT/s Dual-Channel",
+    "gpu": "NVIDIA GeForce RTX 4070",
+    "gpu_architecture": "Ada Lovelace (sm_89)",
+    "gpu_vram_gb": 12,
+    "cuda_version": "13.4",
+    "os": "Windows NT 10.0.26100",
+    "kernel_compiler": "MSVC 19.51 / LLVM 21 (rustc 1.101-nightly)"
+  },
+  "tier1_cuda": {
+    "tier": "Tier 1 - CUDA 13.4 Native (sm_89)",
+    "device": "NVIDIA GeForce RTX 4070",
+    "sm_count": 46,
+    "compute_capability": "8.9",
+    "fma_gflops": 24036.13,
+    "fma_latency_ns": 357376.01,
+    "stream_bandwidth_gbps": 465.34,
+    "stream_latency_ns": 865279.97,
+    "zero_copy_mechanism": "Unified Memory / cudaHostAlloc Pinned / D3D12 SharedHandle"
+  },
+  "tier2_rust": {
+    "tier": "Tier 2 - Rust Sovereign AOT + Fat LTO + zerocopy",
+    "threads": 24,
+    "fma_gflops": 1025.590356750561,
+    "fma_latency_ns": 2094200.0,
+    "stream_bandwidth_gbps": 64.18522691406437,
+    "stream_latency_ns": 6273400.0,
+    "compiler_flags": "rustc -C opt-level=3 -C lto=fat -C codegen-units=1 -C target-cpu=native -C panic=abort",
+    "lto_strategy": "fat"
+  },
+  "tier3_msvc": {
+    "tier": "Tier 3 - MSVC 14.51 C++23 AOT (/O2 /GL /LTCG /arch:AVX2)",
+    "threads": 24,
+    "fma_gflops": 904.32,
+    "fma_latency_ns": 2374699.99,
+    "stream_bandwidth_gbps": 64.56,
+    "stream_latency_ns": 6237300.0,
+    "compiler_flags": "/O2 /GL /LTCG /arch:AVX2 /std:c++latest /fp:fast"
+  },
+  "tier4_dotnet": {
+    "tier": "Tier 4 - .NET 11 SIMD Vector256 / Span<T>",
+    "runtime_version": "11.0.0",
+    "threads": 24,
+    "fma_gflops": 638.03,
+    "fma_latency_ns": 3365800.0,
+    "stream_bandwidth_gbps": 62.63,
+    "stream_latency_ns": 6429300.0,
+    "zero_copy_latency_ns": 0.0,
+    "zero_copy_mechanism": "Span<T> / MemoryMarshal.Cast (0 allocations, 0 copies)"
+  },
+  "tier5_bun": {
+    "tier": "Tier 5 - Pure oven-sh/bun + Inline WebAssembly AOT",
+    "runtime": "Bun 1.4.4",
+    "engine": "JavaScriptCore + WebAssembly AOT",
+    "fma_gflops": 3.5,
+    "fma_latency_ns": 38379000.0,
+    "stream_bandwidth_gbps": 27.39,
+    "stream_latency_ns": 918900.0,
+    "zero_copy_latency_ns": 7400.0,
+    "heap_clone_latency_ns": 12144900.0,
+    "zero_copy_speedup": 1641.2,
+    "octane_mandelbrot_latency_us": 4656.7,
+    "shell_spawn_us": 11518.8,
+    "zero_copy_mechanism": "TypedArray / ArrayBuffer view / SharedArrayBuffer (0 allocations, 0 bytes copied)"
+  },
+  "zerocopy": {
+    "test_name": "Win32 MapViewOfFile + Google zerocopy vs Heap Deserialization",
+    "record_count": 1000000,
+    "total_bytes": 32000000,
+    "win32_mmap_zerocopy_latency_ns": 0.0,
+    "win32_mmap_zerocopy_allocations": 0,
+    "win32_mmap_bytes_copied": 0,
+    "heap_deserialization_latency_ns": 7926800.0,
+    "heap_deserialization_allocations": 2,
+    "heap_bytes_copied": 32000000,
+    "speedup_factor": 7926800.0
+  },
+  "cold_start": {
+    "profiles": [
+      {
+        "name": "Rust Sovereign AOT",
+        "path": "target/release/stack-bench.exe",
+        "size_bytes": 621568,
+        "size_mb": 0.5927734375,
+        "cold_start_us": 3386.1,
+        "build_tier": "Tier 2 - Rust Sovereign",
+        "lto_aot_config": "lto=\"fat\", codegen-units=1, panic=\"abort\", strip=true, -C target-cpu=native"
+      },
+      {
+        "name": "MSVC C++23 AOT",
+        "path": "tier3_msvc/kernel.exe",
+        "size_bytes": 175616,
+        "size_mb": 0.16748046875,
+        "cold_start_us": 108082.9,
+        "build_tier": "Tier 3 - MSVC C++23",
+        "lto_aot_config": "/O2 /GL /LTCG /arch:AVX2 /fp:fast"
+      },
+      {
+        "name": ".NET 11 NativeAOT",
+        "path": "tier4_dotnet/publish/tier4_dotnet.exe",
+        "size_bytes": 1462272,
+        "size_mb": 1.39453125,
+        "cold_start_us": 105613.0,
+        "build_tier": "Tier 4 - .NET 11 NativeAOT",
+        "lto_aot_config": "PublishAot=true, TieredPGO=true, OptimizationPreference=Speed"
+      },
+      {
+        "name": "CUDA 13.4 Native",
+        "path": "tier1_cuda/kernel.exe",
+        "size_bytes": 182784,
+        "size_mb": 0.17431640625,
+        "cold_start_us": 101655.1,
+        "build_tier": "Tier 1 - CUDA 13.4 Native",
+        "lto_aot_config": "nvcc -O3 -arch=sm_89 --use_fast_math"
+      }
+    ],
+    "smallest_binary": "MSVC C++23 AOT",
+    "fastest_cold_start": "Rust Sovereign AOT"
+  },
+  "public_workloads": {
+    "lmbench": {
+      "qpc_clock_read_latency_ns": 12.58,
+      "mmap_create_map_unmap_latency_us": 6.4,
+      "heap_alloc_free_32mb_latency_us": 9.7
+    },
+    "octane_mandelbrot": {
+      "rust_avx2_mandelbrot_us": 2559.7,
+      "bun_jsc_mandelbrot_us": 4656.7,
+      "rust_speedup_vs_jsc": 1.8192366292924953
+    },
+    "shell_startup": {
+      "native_rust_cold_start_us": 110160.7,
+      "bun_cold_start_us": 13248.2,
+      "cmd_cold_start_us": 6662.7,
+      "powershell_cold_start_us": 116462.7,
+      "fastest_shell": "cmd.exe (Win32 NT shell)"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+target/
+*.obj
+*.pdb
+*.ilk
+tier4_dotnet/bin/
+tier4_dotnet/obj/
+tier4_dotnet/publish/
+tier1_cuda/*.exe
+tier1_cuda/*.exp
+tier1_cuda/*.lib
+tier3_msvc/*.exe
+tier3_msvc/*.obj
