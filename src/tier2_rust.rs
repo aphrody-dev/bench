@@ -30,8 +30,8 @@ unsafe fn fma_compute_slice(data: &mut [f32], iters: usize, alpha: f32, beta: f3
     let vc3 = _mm256_set1_ps(0.3);
 
     for i in 0..vec_len {
-        let p = ptr.add(i * 8);
-        let mut v0 = _mm256_loadu_ps(p);
+        let p = unsafe { ptr.add(i * 8) };
+        let mut v0 = unsafe { _mm256_loadu_ps(p) };
         let mut v1 = _mm256_add_ps(v0, vc1);
         let mut v2 = _mm256_add_ps(v0, vc2);
         let mut v3 = _mm256_add_ps(v0, vc3);
@@ -46,7 +46,7 @@ unsafe fn fma_compute_slice(data: &mut [f32], iters: usize, alpha: f32, beta: f3
         let sum1 = _mm256_add_ps(v0, v1);
         let sum2 = _mm256_add_ps(v2, v3);
         let sum = _mm256_add_ps(sum1, sum2);
-        _mm256_storeu_ps(p, sum);
+        unsafe { _mm256_storeu_ps(p, sum) };
     }
 }
 
@@ -60,10 +60,10 @@ unsafe fn triad_slice(a: &[f32], b: &[f32], c: &mut [f32], alpha: f32) {
     let valpha = _mm256_set1_ps(alpha);
 
     for i in 0..vec_len {
-        let va = _mm256_loadu_ps(pa.add(i * 8));
-        let vb = _mm256_loadu_ps(pb.add(i * 8));
+        let va = unsafe { _mm256_loadu_ps(pa.add(i * 8)) };
+        let vb = unsafe { _mm256_loadu_ps(pb.add(i * 8)) };
         let vc = _mm256_fmadd_ps(vb, valpha, va);
-        _mm256_storeu_ps(pc.add(i * 8), vc);
+        unsafe { _mm256_storeu_ps(pc.add(i * 8), vc) };
     }
 }
 

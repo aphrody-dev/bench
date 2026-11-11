@@ -5,7 +5,7 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn wasm_fma_compute(ptr: *mut f32, count: i32, iters: i32, alpha: f32, beta: f32) {
     unsafe {
         let slice = core::slice::from_raw_parts_mut(ptr, count as usize);
@@ -19,7 +19,7 @@ pub extern "C" fn wasm_fma_compute(ptr: *mut f32, count: i32, iters: i32, alpha:
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn wasm_triad(a: *const f32, b: *const f32, c: *mut f32, count: i32, alpha: f32) {
     unsafe {
         let sa = core::slice::from_raw_parts(a, count as usize);
