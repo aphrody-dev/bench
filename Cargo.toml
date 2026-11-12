@@ -2,6 +2,8 @@
 name = "stack-bench"
 version = "0.1.0"
 edition = "2024"
+description = "Hardware and compiler benchmark suite behind `ay bench` (Windows)"
+publish = false
 
 [dependencies]
 argh = "0.1"

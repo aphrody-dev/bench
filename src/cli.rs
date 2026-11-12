@@ -3,16 +3,16 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 
-use stack_bench::cold_start::{self, ColdStartReport};
-use stack_bench::hardware::HardwareSpecs;
-use stack_bench::picker::{pick_stack, Workload};
-use stack_bench::public_bench::{self, PublicWorkloadMetrics};
-use stack_bench::tier1_cuda::{self, Tier1Metrics};
-use stack_bench::tier2_rust::{self, Tier2Metrics};
-use stack_bench::tier3_msvc::{self, Tier3Metrics};
-use stack_bench::tier4_dotnet::{self, Tier4Metrics};
-use stack_bench::tier5_bun::{self, Tier5Metrics};
-use stack_bench::zerocopy_bench::{self, ZeroCopyMetrics};
+use crate::cold_start::{self, ColdStartReport};
+use crate::hardware::HardwareSpecs;
+use crate::picker::{pick_stack, Workload};
+use crate::public_bench::{self, PublicWorkloadMetrics};
+use crate::tier1_cuda::{self, Tier1Metrics};
+use crate::tier2_rust::{self, Tier2Metrics};
+use crate::tier3_msvc::{self, Tier3Metrics};
+use crate::tier4_dotnet::{self, Tier4Metrics};
+use crate::tier5_bun::{self, Tier5Metrics};
+use crate::zerocopy_bench::{self, ZeroCopyMetrics};
 
 #[derive(FromArgs, PartialEq, Debug)]
 /// Unified Real Hardware & Compiler Benchmark & Auto-Stack Picker Suite
@@ -138,8 +138,21 @@ fn chrono_now_string() -> String {
     "2026-11-10T21:20:00Z".to_string()
 }
 
-fn main() {
-    let args: Args = argh::from_env();
+/// Run the benchmark CLI. `cmd` is the name shown in usage (e.g. `ay bench`), `args` follow it.
+/// Returns the process exit code.
+pub fn run(cmd: &str, args: &[String]) -> i32 {
+    let argv: Vec<&str> = args.iter().map(String::as_str).collect();
+    let args = match Args::from_args(&[cmd], &argv) {
+        Ok(args) => args,
+        Err(early) => {
+            if early.status.is_ok() {
+                println!("{}", early.output);
+                return 0;
+            }
+            eprintln!("{}", early.output);
+            return 2;
+        }
+    };
 
     match args.nested {
         SubCommands::Run(cmd) => {
@@ -218,7 +231,7 @@ fn main() {
                 Some(w) => w,
                 None => {
                     eprintln!("Error: Unknown workload '{}'. Options: gpu-compute, compositor, systems-cli, web-edge, wasm-app", cmd.workload);
-                    std::process::exit(1);
+                    return 1;
                 }
             };
 
@@ -334,6 +347,7 @@ fn main() {
             println!("Report generated at BENCHMARK_REPORT.md and {}", profile_path);
         }
     }
+    0
 }
 
 fn generate_markdown_report(path: &str, p: &HardwareProfile) {
@@ -417,7 +431,7 @@ Benchmarking 1,000,000 structured telemetry packets (32 MB payload):
 
 ## 5. Deterministic Stack Picker Decision Matrix
 
-The Decision Engine (`stack-bench pick --workload <type>`) deterministically selects the optimal compiler, LTO, AOT, and zero-copy strategy based on the live hardware measurements above:
+The Decision Engine (`ay bench pick --workload <type>`) deterministically selects the optimal compiler, LTO, AOT, and zero-copy strategy based on the live hardware measurements above:
 
 ### 1. `gpu-compute` (Dense Tensors, Linear Algebra, Matrix Math, Shaders)
 - **Winner:** **Tier 1 — CUDA 13.4 Native (`sm_89` PTX/SASS AOT)**

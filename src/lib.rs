@@ -1,3 +1,4 @@
+pub mod cli;
 pub mod cold_start;
 pub mod hardware;
 pub mod picker;
